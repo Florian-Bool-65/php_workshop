@@ -62,4 +62,24 @@ class QueryHandler {
     
     return $result ? new QueryResult($result) : null;
   }
+  
+  /**
+   * @throws DbException
+   */
+  public static function executeStatement(string $query, string $placeholders, array $params): ?QueryResult {
+    $db     = self::getInstance();
+    $stmt   = $db->prepare($query);
+    
+    if($placeholders !== ''){
+      $stmt->bind_param($placeholders, ...$params);
+    }
+    
+    $result = $stmt->execute();
+    
+    if($db->error){
+      throw new DbException($db->error);
+    }
+    
+    return $result ? new QueryResult($stmt->get_result()) : null;
+  }
 }
